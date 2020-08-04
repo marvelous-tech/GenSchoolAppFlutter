@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
@@ -10,7 +12,9 @@ import 'package:bd_class/services/authentication/login.service.dart';
 import 'package:bd_class/theme/colors.dart';
 import 'package:bd_class/ui/views/attendance/attendance_view.dart';
 import 'package:intl/intl.dart';
+import 'package:jitsi_meet/feature_flag/feature_flag_enum.dart';
 import 'package:jitsi_meet/jitsi_meet.dart';
+import 'package:jitsi_meet/jitsi_meeting_listener.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 import 'AttendanceAddPage/AttendanceAddPage.dart';
 import 'package:string_validator/string_validator.dart';
@@ -35,24 +39,23 @@ class ClassDetailPage extends StatefulWidget {
 
   final int index;
 
-  ClassDetailPage({
-    @required this.classRoomName,
-    @required this.courseName,
-    @required this.instructorName,
-    @required this.instructorSubject,
-    @required this.instructorDesignation,
-    @required this.total,
-    @required this.lessonName,
-    @required this.taken,
-    @required this.classRoomUniqueName,
-    @required this.classPlatform,
-    @required this.presents,
-    @required this.classRoomID,
-    @required this.classID,
-    @required this.index,
-    @required this.classDescription, 
-    @required this.classLink
-  });
+  ClassDetailPage(
+      {@required this.classRoomName,
+      @required this.courseName,
+      @required this.instructorName,
+      @required this.instructorSubject,
+      @required this.instructorDesignation,
+      @required this.total,
+      @required this.lessonName,
+      @required this.taken,
+      @required this.classRoomUniqueName,
+      @required this.classPlatform,
+      @required this.presents,
+      @required this.classRoomID,
+      @required this.classID,
+      @required this.index,
+      @required this.classDescription,
+      @required this.classLink});
 
   @override
   _ClassDetailPageState createState() => _ClassDetailPageState();
@@ -75,29 +78,29 @@ class _ClassDetailPageState extends State<ClassDetailPage> {
   void initState() {
     this.getUser();
     this._class = ClassAddModel(
-      classDescription: this.widget.classDescription,
-      lessonName: this.widget.lessonName,
-      classLink: this.widget.classLink,
-      taken: this.widget.taken
-    );
+        classDescription: this.widget.classDescription,
+        lessonName: this.widget.lessonName,
+        classLink: this.widget.classLink,
+        taken: this.widget.taken);
     this.presents = this.widget.presents;
     this.setIsStudent();
     super.initState();
-    if (isURL(this.widget.classLink))
-      {
-        print(this._class.classLink);
+    JitsiMeet.addListener(JitsiMeetingListener(
+        onConferenceWillJoin: _onConferenceWillJoin,
+        onConferenceJoined: _onConferenceJoined,
+        onConferenceTerminated: _onConferenceTerminated,
+        onError: _onError));
+    if (isURL(this.widget.classLink)) {
+      print(this._class.classLink);
       this.youtubeID = YoutubePlayer.convertUrlToId(this._class.classLink);
       print(this.youtubeID);
-      }
+    }
     this.youtubeID = this.youtubeID;
     if (this.youtubeID != null) {
       this._controller = YoutubePlayerController(
         initialVideoId: this.youtubeID,
         flags: YoutubePlayerFlags(
-          autoPlay: false,
-          mute: false,
-          controlsVisibleAtStart: true
-        ),
+            autoPlay: false, mute: false, controlsVisibleAtStart: true),
       );
     }
   }
@@ -108,34 +111,28 @@ class _ClassDetailPageState extends State<ClassDetailPage> {
     return Scaffold(
       floatingActionButton: this.isStudent == false
           ? SpeedDial(
-            tooltip: 'Actions',
-            overlayOpacity: 0.5,
-            shape: CircleBorder(),
-            animatedIcon: AnimatedIcons.menu_close,
-            animatedIconTheme: IconThemeData(size: 22.0),
-            children: <SpeedDialChild>[
-              SpeedDialChild(
-                backgroundColor: Colors.white,
-                foregroundColor: Colors.green,
-                label: "Add attendance",
-                labelStyle: TextStyle(
-                  color: Colors.grey[800]
-                ),
-                onTap: () => navigateToAddAttendance(context),
-                child: Icon(Icons.group_add)
-              ),
-              SpeedDialChild(
-                backgroundColor: Colors.white,
-                foregroundColor: Colors.red,
-                labelStyle: TextStyle(
-                  color: Colors.grey[800]
-                ),
-                label: "Edit this class",
-                onTap: () => navigateToEditClass(context),
-                child: Icon(Icons.edit)
-              ),
-            ],
-          )
+              tooltip: 'Actions',
+              overlayOpacity: 0.5,
+              shape: CircleBorder(),
+              animatedIcon: AnimatedIcons.menu_close,
+              animatedIconTheme: IconThemeData(size: 22.0),
+              children: <SpeedDialChild>[
+                SpeedDialChild(
+                    backgroundColor: Colors.white,
+                    foregroundColor: Colors.green,
+                    label: "Add attendance",
+                    labelStyle: TextStyle(color: Colors.grey[800]),
+                    onTap: () => navigateToAddAttendance(context),
+                    child: Icon(Icons.group_add)),
+                SpeedDialChild(
+                    backgroundColor: Colors.white,
+                    foregroundColor: Colors.red,
+                    labelStyle: TextStyle(color: Colors.grey[800]),
+                    label: "Edit this class",
+                    onTap: () => navigateToEditClass(context),
+                    child: Icon(Icons.edit)),
+              ],
+            )
           : null,
       key: this._scaffoldKey,
       backgroundColor: background,
@@ -292,8 +289,7 @@ class _ClassDetailPageState extends State<ClassDetailPage> {
                           padding: EdgeInsets.only(bottom: 5.5),
                           child: Text(
                             "Marvelous Meet",
-                            style: TextStyle(
-                              fontSize: 15),
+                            style: TextStyle(fontSize: 15),
                           ),
                         ),
                         Center(
@@ -353,48 +349,51 @@ class _ClassDetailPageState extends State<ClassDetailPage> {
               SizedBox(
                 height: 20,
               ),
-              this.youtubeID != null ? Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: <Widget>[
-                  Padding(
-                    padding: EdgeInsets.all(15),
-                    child: Column(
+              this.youtubeID != null
+                  ? Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: <Widget>[
-                        Text(
-                          "Class Video (Youtube)",
-                          style: TextStyle(
-                              fontSize: 18, fontWeight: FontWeight.bold),
+                        Padding(
+                          padding: EdgeInsets.all(15),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: <Widget>[
+                              Text(
+                                "Class Video (Youtube)",
+                                style: TextStyle(
+                                    fontSize: 18, fontWeight: FontWeight.bold),
+                              ),
+                              SizedBox(
+                                height: 5,
+                              ),
+                              SelectableText(
+                                "${this._class.classLink}",
+                                style: TextStyle(
+                                    fontSize: 13, fontWeight: FontWeight.bold),
+                              ),
+                            ],
+                          ),
                         ),
                         SizedBox(
-                          height: 5,
+                          height: 10,
                         ),
-                        SelectableText(
-                          "${this._class.classLink}",
-                          style: TextStyle(
-                              fontSize: 13, fontWeight: FontWeight.bold),
+                        YoutubePlayer(
+                          liveUIColor: Colors.red[900],
+                          progressColors: ProgressBarColors(
+                              backgroundColor: Colors.blueGrey,
+                              bufferedColor: Colors.grey[500],
+                              playedColor: Colors.blueGrey[800],
+                              handleColor: Colors.blue[800]),
+                          controller: this._controller,
+                          progressIndicatorColor: blue,
+                          showVideoProgressIndicator: true,
+                        ),
+                        SizedBox(
+                          height: 20,
                         ),
                       ],
-                    ),
-                  ),
-                  SizedBox(
-                    height: 10,
-                  ),
-                  YoutubePlayer(
-                    liveUIColor: Colors.red[900],
-                    progressColors: ProgressBarColors(
-                      backgroundColor: Colors.blueGrey,
-                      bufferedColor: Colors.grey[500],
-                      playedColor: Colors.blueGrey[800],
-                      handleColor: Colors.blue[800]
-                    ),
-                    controller: this._controller,
-                    progressIndicatorColor: blue,
-                    showVideoProgressIndicator: true,
-                  ),
-                  SizedBox(height: 20,),
-                ],
-              ) : SizedBox(),
+                    )
+                  : SizedBox(),
               Center(
                 child: Text(
                   this.presents != 0 ? "Attendance" : "No Attendance is issued",
@@ -431,9 +430,25 @@ class _ClassDetailPageState extends State<ClassDetailPage> {
 
   void _joinMeeting() async {
     try {
+      Map<FeatureFlagEnum, bool> featureFlags =
+      {
+        FeatureFlagEnum.WELCOME_PAGE_ENABLED : false,
+      };
+
+      // Here is an example, disabling features for each platform
+      if (Platform.isAndroid)
+      {
+        // Disable ConnectionService usage on Android to avoid issues (see README)
+        featureFlags[FeatureFlagEnum.CALL_INTEGRATION_ENABLED] = false;
+      }
+      else if (Platform.isIOS)
+      {
+        // Disable PIP on iOS as it looks weird
+        featureFlags[FeatureFlagEnum.PIP_ENABLED] = false;
+      }
+
       var options = JitsiMeetingOptions()
-        ..room =
-            this.widget.classRoomUniqueName // Required, spaces will be trimmed
+        ..room = this.widget.classRoomUniqueName // Required, spaces will be trimmed
         ..serverURL = "https://meet.marvelous-tech.com"
         ..subject = this.widget.lessonName
         ..userDisplayName = this._user.firstName + " " + this._user.lastName
@@ -442,7 +457,16 @@ class _ClassDetailPageState extends State<ClassDetailPage> {
         ..audioMuted = true
         ..videoMuted = true;
 
-      await JitsiMeet.joinMeeting(options);
+      await JitsiMeet.joinMeeting(
+        options,
+        listener: JitsiMeetingListener(onConferenceWillJoin: ({message}) {
+          debugPrint("${options.room} will join with message: $message");
+        }, onConferenceJoined: ({message}) {
+          debugPrint("${options.room} joined with message: $message");
+        }, onConferenceTerminated: ({message}) {
+          debugPrint("${options.room} terminated with message: $message");
+        }),
+      );
     } catch (error) {
       debugPrint("error: $error");
     }
@@ -454,8 +478,9 @@ class _ClassDetailPageState extends State<ClassDetailPage> {
         MaterialPageRoute(
             builder: (BuildContext context) {
               return AttendanceAddPage(
-                  classRoomID: this.widget.classRoomID,
-                  classID: this.widget.classID,);
+                classRoomID: this.widget.classRoomID,
+                classID: this.widget.classID,
+              );
             },
             fullscreenDialog: true));
 
@@ -477,7 +502,8 @@ class _ClassDetailPageState extends State<ClassDetailPage> {
                 link: this._class.classLink,
                 taken: this._class.taken,
                 classRoomID: this.widget.classRoomID,
-                classRoomName: this.widget.classRoomName,);
+                classRoomName: this.widget.classRoomName,
+              );
             },
             fullscreenDialog: true));
 
@@ -485,32 +511,26 @@ class _ClassDetailPageState extends State<ClassDetailPage> {
       this.setState(() {
         print(result.toJson().toString());
         this._class = result;
-        if (isURL(this.widget.classLink))
-        {
+        if (isURL(this.widget.classLink)) {
           print(this._class.classLink);
           this.youtubeID = YoutubePlayer.convertUrlToId(this._class.classLink);
           print(this.youtubeID);
-          }
+        }
         this.youtubeID = this.youtubeID == null ? "empty" : this.youtubeID;
         if (this.youtubeID != null) {
           this._controller = YoutubePlayerController(
             initialVideoId: this.youtubeID,
             flags: YoutubePlayerFlags(
-              autoPlay: false,
-              mute: false,
-              controlsVisibleAtStart: true
-            ),
+                autoPlay: false, mute: false, controlsVisibleAtStart: true),
           );
         }
       });
-      this._scaffoldKey.currentState.showSnackBar(
-        SnackBar(
-          content: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: SuccessMsgText(msg: "Class has been updated"),
-          ),
-        ) 
-      );
+      this._scaffoldKey.currentState.showSnackBar(SnackBar(
+            content: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: SuccessMsgText(msg: "Class has been updated"),
+            ),
+          ));
     }
   }
 
@@ -531,11 +551,28 @@ class _ClassDetailPageState extends State<ClassDetailPage> {
   void dispose() {
     _controller?.dispose();
     super.dispose();
+    JitsiMeet.removeAllListeners();
   }
 
   void getUser() async {
     await this._loginService.thisUser.then((value) => this.setState(() {
-      this._user = value;
-    }));
+          this._user = value;
+        }));
+  }
+
+  void _onConferenceWillJoin({message}) {
+    debugPrint("_onConferenceWillJoin broadcasted with message: $message");
+  }
+
+  void _onConferenceJoined({message}) {
+    debugPrint("_onConferenceJoined broadcasted with message: $message");
+  }
+
+  void _onConferenceTerminated({message}) {
+    debugPrint("_onConferenceTerminated broadcasted with message: $message");
+  }
+
+  _onError(error) {
+    debugPrint("_onError broadcasted: $error");
   }
 }

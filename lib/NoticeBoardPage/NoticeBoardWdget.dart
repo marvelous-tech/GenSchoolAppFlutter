@@ -98,7 +98,7 @@ class NoticeBoardWidget extends StatelessWidget {
                     SizedBox(
                       height: 20,
                     ),
-                    Text(
+                    SelectableText(
                       notice.body,
                       style: TextStyle(color: Colors.grey[400]),
                     )
