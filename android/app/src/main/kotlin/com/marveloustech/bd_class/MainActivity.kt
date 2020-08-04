@@ -1,0 +1,6 @@
+package com.marveloustech.bd_class
+
+import io.flutter.embedding.android.FlutterActivity
+
+class MainActivity: FlutterActivity() {
+}

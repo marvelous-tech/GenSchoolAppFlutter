@@ -1,0 +1,7 @@
+class BaseAuthService {
+
+}
+
+class UnAuthorized {
+
+}
