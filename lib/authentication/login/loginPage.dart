@@ -25,32 +25,9 @@ class LoginPage extends StatelessWidget {
             child: Column(
               children: <Widget>[
                 Padding(
-                  padding: const EdgeInsets.only(bottom: 50.0, top: 100),
+                  padding: const EdgeInsets.only(bottom: 20.0, top: 100),
                   child: Center(
-                    child: RichText(
-                      text: TextSpan(
-                        style: TextStyle(
-                          letterSpacing: 10,
-                          fontWeight: FontWeight.bold,
-                          fontFamily: 'PatrickHand',
-                          fontSize: 30
-                        ),
-                        children: [
-                          TextSpan(
-                            text: "Es",
-                            style: TextStyle(color: Color(0xff1ebdff))
-                          ),
-                          TextSpan(
-                              text: "tu",
-                              style: TextStyle(color: Color(0xffff0000))
-                          ),
-                          TextSpan(
-                              text: "do",
-                              style: TextStyle(color: Color(0xffff00ba))
-                          )
-                        ]
-                      ),
-                    )
+                    child: Image.asset("avatars/loginLogo.png", width: 140,),
                   ),
                 ),
                 LoginForm(isSessionExpired: this.isSessionExpired),
