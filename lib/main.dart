@@ -48,7 +48,6 @@ class MyApp extends StatelessWidget {
     return new MaterialApp(
       theme: ThemeData(
         fontFamily: 'Roboto',
-        accentColor: Colors.amberAccent,
         brightness: Brightness.dark,
         scaffoldBackgroundColor: Color(0xff212022),
         backgroundColor: Color(0xff212022),

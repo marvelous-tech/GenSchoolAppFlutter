@@ -1,11 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:bd_class/authentication/login/login_form.dart';
 import 'package:bd_class/theme/colors.dart';
+import 'package:package_info/package_info.dart';
 
-class LoginPage extends StatelessWidget {
+class LoginPage extends StatefulWidget {
   final bool isSessionExpired;
 
   LoginPage({this.isSessionExpired});
+
+  @override
+  _LoginPageState createState() => _LoginPageState();
+}
+
+class _LoginPageState extends State<LoginPage> {
+  String version;
+
+  @override
+  void initState() {
+    this.setVersion();
+    super.initState();
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -33,15 +48,23 @@ class LoginPage extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.only(bottom: 20.0, top: 5),
                   child: Center(
-                    child: Text("V1.4.201")
+                    child: Text("V${this.version}")
                   ),
                 ),
-                LoginForm(isSessionExpired: this.isSessionExpired),
+                LoginForm(isSessionExpired: this.widget.isSessionExpired),
               ],
             ),
           ),
         ),
       ),
     );
+  }
+
+  void setVersion() async {
+    PackageInfo.fromPlatform().then((PackageInfo packageInfo) {
+      setState(() {
+        this.version = packageInfo.version;
+      });
+    });
   }
 }

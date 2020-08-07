@@ -76,24 +76,22 @@ class NoticeBoardWidget extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: <Widget>[
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: <Widget>[
-                        Text(
-                          notice.title,
-                          style: TextStyle(
-                            fontSize: 17,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        Text(
-                          DateFormat.yMMMEd().add_jm().format(
-                              DateTime.parse(notice.added)
-                                  .add(Duration(hours: 6))),
-                          style: TextStyle(
-                              fontSize: 12, fontWeight: FontWeight.bold),
-                        ),
-                      ],
+                    Text(
+                      notice.title,
+                      style: TextStyle(
+                        fontSize: 17,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    SizedBox(
+                      height: 5,
+                    ),
+                    Text(
+                      DateFormat.yMMMEd().add_jm().format(
+                          DateTime.parse(notice.added)
+                              .add(Duration(hours: 6))),
+                      style: TextStyle(
+                          fontSize: 12, fontWeight: FontWeight.bold),
                     ),
                     SizedBox(
                       height: 20,

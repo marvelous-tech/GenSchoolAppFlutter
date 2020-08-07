@@ -4,13 +4,27 @@ import 'package:bd_class/models/user.model.dart';
 import 'package:bd_class/services/authentication/login.service.dart';
 import 'package:bd_class/theme/colors.dart';
 import 'theme/colors.dart';
+import 'package:package_info/package_info.dart';
 
-class DrawerWidget extends StatelessWidget {
-  final LoginService _loginService = LoginService();
-
+class DrawerWidget extends StatefulWidget {
   final User user;
 
   DrawerWidget({@required this.user});
+
+  @override
+  _DrawerWidgetState createState() => _DrawerWidgetState();
+}
+
+class _DrawerWidgetState extends State<DrawerWidget> {
+  final LoginService _loginService = LoginService();
+
+  String version;
+
+  @override
+  void initState() {
+    this.setVersion();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -19,9 +33,9 @@ class DrawerWidget extends StatelessWidget {
 
   Widget drawer(BuildContext context) {
     String type;
-    if (this.user.userType == 'client-instructor')
+    if (this.widget.user.userType == 'client-instructor')
       type = 'Instructor';
-    else if (this.user.userType == 'client-student')
+    else if (this.widget.user.userType == 'client-student')
       type = 'Student';
     print(type);
     return Drawer(
@@ -56,19 +70,31 @@ class DrawerWidget extends StatelessWidget {
                   Positioned(
                     top: 45.0,
                     left: 15.0,
-                    child: Text(
-                      "Developed by Fahim",
-                      style: TextStyle(
-                        fontSize: 13,
-                        letterSpacing: 0.5,
-                      ),
+                    child: Row(
+                      children: <Widget>[
+                        Text(
+                          "BD Class V${this.version} ",
+                          style: TextStyle(
+                            fontSize: 13,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                        Icon(Icons.developer_mode, size: 8,),
+                        Text(
+                          " Fahim",
+                          style: TextStyle(
+                            fontSize: 13,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                   Positioned(
                     bottom: 30.0,
                     left: 15.0,
                     child: Text(
-                      this.user.firstName + " " + this.user.lastName,
+                      this.widget.user.firstName + " " + this.widget.user.lastName,
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 20.0,
@@ -167,6 +193,14 @@ class DrawerWidget extends StatelessWidget {
       Navigator.pushNamedAndRemoveUntil(
           context, "/login", (Route<dynamic> route) => false);
       return null;
+    });
+  }
+
+  void setVersion() async {
+    PackageInfo.fromPlatform().then((PackageInfo packageInfo) {
+      setState(() {
+        this.version = packageInfo.version;
+      });
     });
   }
 }
