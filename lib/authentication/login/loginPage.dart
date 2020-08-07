@@ -25,9 +25,15 @@ class LoginPage extends StatelessWidget {
             child: Column(
               children: <Widget>[
                 Padding(
-                  padding: const EdgeInsets.only(bottom: 20.0, top: 100),
+                  padding: const EdgeInsets.only(bottom: 2.0, top: 100),
                   child: Center(
                     child: Image.asset("avatars/loginLogo.png", width: 140,),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 20.0, top: 5),
+                  child: Center(
+                    child: Text("V1.4.201")
                   ),
                 ),
                 LoginForm(isSessionExpired: this.isSessionExpired),
